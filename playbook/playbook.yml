@@ -1,0 +1,238 @@
+---
+- name: Configure Spheron Node with Ubuntu 22.04
+  hosts: all
+  become: yes
+  vars:
+    user_name: spheron
+    user_password: '$6$ENk9jBUXFl8NVM56$wq3wLpWzV8qK1kcrf6wNa8DiqU5KeSBTddc5d2V3mNOvET2oDcMAr0CtxdHv/A7aecWM7QXiveiWHl0xDpBBa.'
+    hostname: provider.devnetasphn.com
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no" #Disable check for new hosts
+
+  tasks:
+
+    - name: Ensure the system timezone is set to UTC
+      ansible.builtin.timezone:
+        name: Etc/UTC
+
+    - name: Set hostname
+      hostname:
+        name: "{{ hostname }}"
+
+    # - name: Create a new user
+      user:
+        name: "{{ user_name }}"
+        password: "{{ user_password }}"
+        shell: /bin/bash
+        create_home: yes
+
+    - name: Copy public key to target
+      authorized_key:
+        user: "{{ user_name }}"
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+
+
+    # - name: Install necessary packages
+      apt:
+        name:
+          - ubuntu-drivers-common
+          - cloud-guest-utils
+          - open-vm-tools
+          - net-tools
+          - unzip
+          - snapd
+          - bmon
+          - htop
+          - iotop
+          - jq
+          - bc
+          - git
+          - curl
+          - screen
+          - qrencode
+          - lvm2
+          - python3-pip
+          - gunicorn
+          - fail2ban
+        update_cache: yes
+        state: present
+
+# Set GRUB timeout to 0 seconds for near-instant booting
+    - name: Set GRUB timeout
+      lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_TIMEOUT='
+        line: 'GRUB_TIMEOUT=0'
+
+#TIME
+    - name: Ensure chrony (NTP) package is installed
+      apt:
+        name: chrony
+        state: present
+
+    - name: Ensure chrony service is enabled and running
+      service:
+        name: chronyd
+        state: started
+        enabled: true
+
+    - name: Force an immediate synchronization of the time
+      command:
+        cmd: chronyc makestep
+      changed_when: false
+
+    - name: Check if NTP is synchronized
+      command: chronyc tracking
+      register: ntp_status
+      changed_when: false
+
+    - name: Display NTP synchronization status
+      debug:
+        var: ntp_status.stdout_lines
+
+#LIMITS
+    - name: Increase max FD limit / ulimit
+      blockinfile:
+        path: "/etc/security/limits.conf"
+        block: |
+          * soft     nproc          1048576
+          * hard     nproc          1048576
+          * soft     nofile         1048576
+          * hard     nofile         1048576
+          root soft     nproc          unlimited
+          root hard     nproc          unlimited
+          root soft     nofile         unlimited
+          root hard     nofile         unlimited
+
+    - name: Add sysctl.conf parameters
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_set: yes
+        reload: yes
+      loop:
+        - { name: 'vm.min_free_kbytes', value: '131072' } #128Mb Memory Reserve
+        - { name: 'vm.swappiness', value: '0' }
+        - { name: 'fs.inotify.max_queued_events', value: '1048576' }
+        - { name: 'fs.inotify.max_user_instances', value: '1048576' }
+        - { name: 'fs.inotify.max_user_watches', value: '1048576' }
+        - { name: 'vm.max_map_count', value: '262144' }
+        - { name: 'fs.aio-max-nr', value: '524288' }
+
+    - name: Clear all journald logs
+      command: journalctl --vacuum-time=1s
+
+
+    # - name: Create Spheron profile script
+      copy:
+        dest: "/etc/profile.d/spheron.sh"
+        content: |
+          #!/bin/bash
+          clear
+          echo "Downloading the latest Spheron..."
+          if [ -f /home/spheron/start-spheron.sh ]; then
+            rm /home/spheron/start-spheron.sh
+          fi
+          #Todo change the url
+          wget -q --no-cache https://raw.githubusercontent.com/spheronFdn/provider-deployment/devnet/scripts/start-spheron.sh
+          chmod +x ./start-spheron.sh ; ./start-spheron.sh
+        mode: '0755'
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+
+    - name: Create system issue file
+      copy:
+        dest: "/etc/issue"
+        content: |
+          ---------------------------------------------------------------------------------------|
+          |  Welcome to Spheron OS Ubuntu 22.04.3 LTS \l
+          |  Default User     : spheron
+          |  Default Password : spheron
+          |  Default Hostname : \n
+          |  IP Address       : \4
+          |  ISO Version      : v0.5 Alpha
+          |  News:            : GPU is now supported with k3s.
+          |
+          |--------------------------------------------------------------------------------------|
+          | Web Dashboard : Open http://\4:8080 to finish the configuration.
+          |                                                                                      |
+          | Terminal      : We recommend you login to spheron@\4
+          |               : with a terminal that supports copy and paste.
+          |--------------------------------------------------------------------------------------|
+        mode: '0644'
+
+    - name: Update SSH and MOTD settings
+      lineinfile:
+        path: "{{ item.path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { path: "/etc/default/motd-news", regexp: "^ENABLED=1", line: "ENABLED=0" }
+        - { path: "/etc/ssh/sshd_config", regexp: "^#PrintLastLog yes", line: "PrintLastLog no" }
+
+    - name: Cleanup Swap
+      command: "{{ item }}"
+      loop:
+        - swapoff -a
+        - rm -f /swap.img
+
+    - name: Update GRUB configuration for fast boot
+      lineinfile:
+        path: "/etc/default/grub"
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"'
+      notify:
+        - update grub
+
+    - name: Perform system cleanup
+      apt:
+        autoclean: yes
+        autoremove: yes
+
+    - name: Add spheron to sudoers for NOPASSWD
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^spheron ALL=\(ALL\) NOPASSWD:ALL'
+        line: 'spheron ALL=(ALL) NOPASSWD:ALL'
+
+    - name: Clone Akash dashboard repository
+      git:
+        repo: 'https://github.com/cryptoandcoffee/akashos-dashboard.git'
+        dest: '/home/spheron/dashboard'
+        version: HEAD
+        clone: yes
+        update: yes
+      become_user: "{{ user_name }}"
+
+    - name: Generate SSH key for spheron user
+      user:
+        name: "{{ user_name }}"
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_comment: "spheron-node-1"
+        ssh_key_file: "/home/spheron/.ssh/id_rsa"
+
+    - name: Enable and start necessary services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - ssh
+        - fail2ban
+        - getty@tty1.service
+
+    - name: Restart server
+      reboot:
+        msg: "Rebooting to apply system changes"
+        connect_timeout: 5
+        reboot_timeout: 300
+        post_reboot_delay: 30
+        test_command: uptime
+
+# Define the handler at the end of your playbook
+  handlers:
+    - name: update grub
+      command: update-grub
