@@ -368,7 +368,8 @@ install_spheron &>> /home/spheron/logs/installer/spheron.log
 function setup_wallet(){
 if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
-spheron keys add "wallet" --key-secret $KEY_SECRET --home ~/.spheron
+spheron keys add "wallet" --key-secret $KEY_SECRET --home /home/spheron/.spheron
+chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
 fi
 }

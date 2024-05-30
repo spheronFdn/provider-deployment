@@ -5,7 +5,7 @@
   vars:
     user_name: spheron
     user_password: '$6$ENk9jBUXFl8NVM56$wq3wLpWzV8qK1kcrf6wNa8DiqU5KeSBTddc5d2V3mNOvET2oDcMAr0CtxdHv/A7aecWM7QXiveiWHl0xDpBBa.'
-    hostname: provider.devnetasphn.com
+    hostname: provider.devnetbsphn.com
     ansible_ssh_common_args: "-o StrictHostKeyChecking=no" #Disable check for new hosts
 
   tasks:
@@ -18,7 +18,7 @@
       hostname:
         name: "{{ hostname }}"
 
-    # - name: Create a new user
+    - name: Create a new user
       user:
         name: "{{ user_name }}"
         password: "{{ user_password }}"
@@ -32,7 +32,7 @@
 
 
 
-    # - name: Install necessary packages
+    - name: Install necessary packages
       apt:
         name:
           - ubuntu-drivers-common
@@ -124,7 +124,7 @@
       command: journalctl --vacuum-time=1s
 
 
-    # - name: Create Spheron profile script
+    - name: Create Spheron profile script
       copy:
         dest: "/etc/profile.d/spheron.sh"
         content: |
