@@ -41,14 +41,14 @@ helm upgrade -i nvdp nvdp/nvidia-device-plugin \
   --set deviceListStrategy=volume-mounts
 
 # create containerd config
-cat > etc/rancher/k3/config.yaml <<'EOF'
+sudo cat <<EOF > /etc/rancher/k3/config.yaml
 containerd_additional_runtimes:
- - name: nvidia
-   type: "io.containerd.runc.v2"
-   engine: ""
-   root: ""
-   options:
-     BinaryName: '/usr/bin/nvidia-container-runtime'
+  - name: nvidia
+    type: "io.containerd.runc.v2"
+    engine: ""
+    root: ""
+    options:
+      BinaryName: '/usr/bin/nvidia-container-runtime'
 EOF
 
 setup_environment() {
