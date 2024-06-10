@@ -27,17 +27,6 @@ metadata:
 handler: nvidia
 EOF
 
-# create containerd config
-cat > etc/rancher/k3/config.yaml <<'EOF'
-containerd_additional_runtimes:
- - name: nvidia
-   type: "io.containerd.runc.v2"
-   engine: ""
-   root: ""
-   options:
-     BinaryName: '/usr/bin/nvidia-container-runtime'
-EOF
-
   kubectl apply -f /home/spheron/gpu-nvidia-runtime-class.yaml
 
   # Install NVIDIA Device Plugin

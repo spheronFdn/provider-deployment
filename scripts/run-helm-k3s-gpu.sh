@@ -18,6 +18,38 @@ helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
 
 helm repo update
 
+helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
+
+helm repo update
+
+# Create NVIDIA RuntimeClass
+cat > /home/spheron/gpu-nvidia-runtime-class.yaml <<EOF
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: nvidia
+handler: nvidia
+EOF
+
+kubectl apply -f /home/spheron/gpu-nvidia-runtime-class.yaml
+
+helm upgrade -i nvdp nvdp/nvidia-device-plugin \
+  --namespace nvidia-device-plugin \
+  --create-namespace \
+  --version 0.14.5 \
+  --set runtimeClassName="nvidia" \
+  --set deviceListStrategy=volume-mounts
+
+# create containerd config
+cat > etc/rancher/k3/config.yaml <<'EOF'
+containerd_additional_runtimes:
+ - name: nvidia
+   type: "io.containerd.runc.v2"
+   engine: ""
+   root: ""
+   options:
+     BinaryName: '/usr/bin/nvidia-container-runtime'
+EOF
 
 setup_environment() {
     # Kubernetes config
