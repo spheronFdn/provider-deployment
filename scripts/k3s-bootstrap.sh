@@ -422,10 +422,11 @@ echo "Installing Spheron provider and bid-engine"
 if [[ $GPU_ == "true" ]]; then
 echo "Found GPU, using testnet config!"
 wget -q https://raw.githubusercontent.com/spheronFdn/provider-deployment/devnet/scripts/run-helm-k3s-gpu.sh
-wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/bid-engine-script-gpu.sh
-chmod +x run-helm-k3s-gpu.sh ; chmod +x bid-engine-script-gpu.sh
+# wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/bid-engine-script-gpu.sh
+chmod +x run-helm-k3s-gpu.sh  
+# chmod +x bid-engine-script-gpu.sh
 mv run-helm-k3s-gpu.sh run-helm-k3s.sh
-mv bid-engine-script-gpu.sh bid-engine-script.sh
+# mv bid-engine-script-gpu.sh bid-engine-script.sh
 chown spheron:spheron *.sh
 echo "Running Helm Provider install after first reboot to get nvidia-smi"
 else

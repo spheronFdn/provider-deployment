@@ -118,11 +118,11 @@ done
 }
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services
+    helm upgrade --install akash-hostname-operator ./akash-hostname-operator -n akash-services
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services
+    helm upgrade --install inventory-operator ./akash-inventory-operator -n akash-services
 }
 
 persistent_storage() {
