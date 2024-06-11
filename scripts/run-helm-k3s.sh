@@ -7,7 +7,6 @@ export KUBECONFIG=/home/spheron/.kube/kubeconfig
 git clone  https://github.com/spheronFdn/provider-helm-charts.git
 cd provider-helm-charts/charts
 git checkout devnet-spheron
-# helm repo add akash https://akash-network.github.io/helm-charts
 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add rook-release https://charts.rook.io/release
@@ -19,8 +18,8 @@ helm repo update
 
 setup_environment() {
     # Kubernetes config
-    kubectl create ns akash-services
-    kubectl label ns akash-services akash.network/name=akash-services akash.network=true
+    kubectl create ns spheron-services
+    kubectl label ns spheron-services akash.network/name=spheron-services akash.network=true
     kubectl create ns lease
     kubectl label ns lease akash.network=true
     kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/main/pkg/apis/akash.network/crd.yaml
@@ -32,7 +31,7 @@ kubectl create ns metallb-system
 helm repo add metallb https://metallb.github.io/metallb
 helm upgrade --install metallb metallb/metallb -n metallb-system --wait
 kubectl -n metallb-system expose deployment metallb-controller --name=controller --overrides='{"spec":{"ports":[{"protocol":"TCP","name":"monitoring","port":7472}]}}'
-helm upgrade --install akash-ip-operator akash-ip-operator -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
+helm upgrade --install spheron-ip-operator spheron-ip-operator -n spheron-services --set provider_address=$ACCOUNT_ADDRESS --wait
 kubectl apply -f metal-lb.yml
 }
 
@@ -43,7 +42,7 @@ controller:
   service:
     type: ClusterIP
   ingressClassResource:
-    name: "akash-ingress-class"
+    name: "spheron-ingress-class"
   kind: DaemonSet
   hostPort:
     enabled: true
@@ -58,24 +57,24 @@ controller:
   extraArgs:
     enable-ssl-passthrough: true
 tcp:
-  "8443": "akash-services/akash-provider:8443"
-  "8444": "akash-services/akash-provider:8444"
-  "1317": "akash-services/akash-node-1:1317"
-  "9090":  "akash-services/akash-node-1:9090"
-  "26656": "akash-services/akash-node-1:26656"
-  "26657": "akash-services/akash-node-1:26657"
+  "8443": "spheron-services/spheron-provider:8443"
+  "8444": "spheron-services/spheron-provider:8444"
+  "1317": "spheron-services/spheron-node-1:1317"
+  "9090":  "spheron-services/spheron-node-1:9090"
+  "26656": "spheron-services/spheron-node-1:26656"
+  "26657": "spheron-services/spheron-node-1:26657"
 EOF
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
       --namespace ingress-nginx --create-namespace \
       -f ingress-nginx-custom.yaml
 
 kubectl label ns ingress-nginx app.kubernetes.io/name=ingress-nginx app.kubernetes.io/instance=ingress-nginx
-kubectl label ingressclass akash-ingress-class akash.network=true
+kubectl label ingressclass spheron-ingress-class akash.network=true
 
 }
 
 provider_setup() {
-    helm upgrade --install akash-provider ./akash-provider -n akash-services \
+    helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
         --set attributes[0].key=region --set attributes[0].value=$REGION \
         --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
         --set attributes[2].key=host --set attributes[2].value=$HOST \
@@ -102,24 +101,22 @@ provider_setup() {
         --set resources.requests.cpu="1" \
         --set resources.requests.memory="1Gi"
 
-    # Provider customizations
-    # kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.75 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
-
-    kubectl patch configmap akash-provider-scripts \
-      --namespace akash-services \
+   
+    kubectl patch configmap spheron-provider-scripts \
+      --namespace spheron-services \
       --type json \
       --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
 
-    kubectl rollout restart statefulset/akash-provider -n akash-services
+    kubectl rollout restart statefulset/spheron-provider -n spheron-services
 }
 
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator ./akash-hostname-operator -n akash-services
+    helm upgrade --install spheron-hostname-operator ./spheron-hostname-operator -n spheron-services
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator ./akash-inventory-operator -n akash-services
+    helm upgrade --install inventory-operator ./spheron-inventory-operator -n spheron-services
 }
 
 persistent_storage() {
@@ -148,7 +145,7 @@ cephClusterSpec:
       osdsPerDevice: "1"
 
 cephBlockPools:
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -173,7 +170,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -198,7 +195,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -223,7 +220,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-nodes
+  - name: spheron-nodes
     spec:
       failureDomain: host
       replicated:
@@ -271,7 +268,7 @@ helm upgrade --install --create-namespace -n rook-ceph rook-ceph-cluster --set o
 
 sleep 30
 
-kubectl label sc akash-nodes akash.network=true
+kubectl label sc spheron-nodes akash.network=true
 kubectl label sc beta3 akash.network=true
 kubectl label sc beta2 akash.network=true
 kubectl label sc beta1 akash.network=true

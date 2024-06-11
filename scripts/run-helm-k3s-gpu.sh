@@ -53,8 +53,8 @@ EOF
 
 setup_environment() {
     # Kubernetes config
-    kubectl create ns akash-services
-    kubectl label ns akash-services akash.network/name=akash-services akash.network=true
+    kubectl create ns spheron-services
+    kubectl label ns spheron-services akash.network/name=akash-services akash.network=true
     kubectl create ns lease
     kubectl label ns lease akash.network=true
     kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/main/pkg/apis/akash.network/crd.yaml
@@ -67,7 +67,7 @@ controller:
   service:
     type: ClusterIP
   ingressClassResource:
-    name: "akash-ingress-class"
+    name: "spheron-ingress-class"
   kind: DaemonSet
   hostPort:
     enabled: true
@@ -82,18 +82,18 @@ controller:
   extraArgs:
     enable-ssl-passthrough: true
 tcp:
-  "1317": "akash-services/akash-node-1:1317"
-  "8443": "akash-services/akash-provider:8443"
-  "9090":  "akash-services/akash-node-1:9090"
-  "26656": "akash-services/akash-node-1:26656"
-  "26657": "akash-services/akash-node-1:26657"
+  "1317": "spheron-services/spheron-node-1:1317"
+  "8443": "spheron-services/spheron-provider:8443"
+  "9090":  "spheron-services/spheron-node-1:9090"
+  "26656": "spheron-services/spheron-node-1:26656"
+  "26657": " spheron-services/spheron-node-1:26657"
 EOF
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
       --namespace ingress-nginx --create-namespace \
       -f ingress-nginx-custom.yaml
 
 kubectl label ns ingress-nginx app.kubernetes.io/name=ingress-nginx app.kubernetes.io/instance=ingress-nginx
-kubectl label ingressclass akash-ingress-class akash.network=true
+kubectl label ingressclass spheron-ingress-class akash.network=true
 
 }
 
@@ -126,35 +126,33 @@ for model in $gpu_models; do
     ((counter++))
 done
 
-    helm upgrade --install akash-provider ./akash-provider -n akash-services \
+    helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
         --set from=$ACCOUNT_ADDRESS \
         --set keysecret=$KEY_SECRET \
         --set domain=$DOMAIN \
-        --set bidpricestrategy=randomRange \
         --set ipoperator=false \
         --set node=$NODE \
+        --set bidpricescript="$(cat /home/spheron/big-engine-script.sh | openssl base64 -A)" \
         --set log_restart_patterns="rpc node is not catching up|bid failed" \
         --set resources.limits.cpu="2" \
         --set resources.limits.memory="2Gi" \
         --set resources.requests.cpu="1" \
         --set resources.requests.memory="1Gi"
 
-    kubectl patch configmap akash-provider-scripts \
-      --namespace akash-services \
+    kubectl patch configmap spheron-provider-scripts \
+      --namespace spheron-services \
       --type json \
       --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
 
-    kubectl rollout restart statefulset/akash-provider -n akash-services
-    # Provider customizations
-    # kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.028uakt AKASH_GAS_ADJUSTMENT=1.42 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=6h -n akash-services
-}
+    kubectl rollout restart statefulset/spheron-provider -n spheron-services
+  }
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator ./akash-hostname-operator -n akash-services
+    helm upgrade --install spheron-hostname-operator ./spheron-hostname-operator -n spheron-services
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator ./akash-inventory-operator -n akash-services
+    helm upgrade --install inventory-operator ./spheron-inventory-operator -n spheron-services
 }
 
 persistent_storage() {
@@ -183,7 +181,7 @@ cephClusterSpec:
       osdsPerDevice: "1"
 
 cephBlockPools:
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -208,7 +206,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -233,7 +231,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-deployments
+  - name: spheron-deployments
     spec:
       failureDomain: host
       replicated:
@@ -258,7 +256,7 @@ cephBlockPools:
         csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         csi.storage.k8s.io/fstype: ext4
 
-  - name: akash-nodes
+  - name: spheron-nodes
     spec:
       failureDomain: host
       replicated:
@@ -267,7 +265,7 @@ cephBlockPools:
         min_size: "1"
     storageClass:
       enabled: true
-      name: akash-nodes
+      name: spheron-nodes
       isDefault: false
       reclaimPolicy: Delete
       allowVolumeExpansion: true
@@ -306,7 +304,7 @@ helm upgrade --install --create-namespace -n rook-ceph rook-ceph-cluster --set o
 
 sleep 30
 
-kubectl label sc akash-nodes akash.network=true
+kubectl label sc spheron-nodes akash.network=true
 kubectl label sc beta3 akash.network=true
 kubectl label sc beta2 akash.network=true
 kubectl label sc beta1 akash.network=true
