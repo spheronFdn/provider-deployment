@@ -308,7 +308,7 @@ apt install ubuntu-drivers-common
 ubuntu-drivers autoinstall
 apt-get install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime 
 
-mkdir -p /etc/rancher/k3/config.yaml
+mkdir -p /etc/rancher/k3/
 cat > /etc/rancher/k3/config.yaml <<'EOF'
 containerd_additional_runtimes:
   - name: nvidia
@@ -382,7 +382,7 @@ function setup_wallet(){
 if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
 mkdir -p /home/spheron/.spheron
-spheron keys add "wallet" --key-secret $KEY_SECRET --home /home/spheron/.spheron
+spheron keys create --name wallet --key-secret testPassword
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
 fi

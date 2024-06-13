@@ -75,20 +75,6 @@ kubectl label ingressclass spheron-ingress-class akash.network=true
 
 provider_setup() {
     helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
-        --set attributes[0].key=region --set attributes[0].value=$REGION \
-        --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
-        --set attributes[2].key=host --set attributes[2].value=$HOST \
-        --set attributes[3].key=cpu --set attributes[3].value=$CPU \
-        --set attributes[4].key=tier --set attributes[4].value=$TIER \
-        --set attributes[5].key=network_download --set attributes[5].value=$DOWNLOAD \
-        --set attributes[6].key=network_upload --set attributes[6].value=$UPLOAD \
-        --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
-        --set attributes[8].key=capabilities/storage/1/class --set attributes[8].value=beta1 \
-        --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=true \
-        --set attributes[10].key=capabilities/storage/2/class --set attributes[10].value=beta2 \
-        --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
-        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
-        --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
         --set from=$ACCOUNT_ADDRESS \
         --set keysecret=$KEY_SECRET \
         --set domain=$DOMAIN \
