@@ -307,6 +307,18 @@ apt-get -o Acquire::ForceIPv4=true update
 apt install ubuntu-drivers-common
 ubuntu-drivers autoinstall
 apt-get install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime 
+
+mkdir -p /etc/rancher/k3/config.yaml
+cat > /etc/rancher/k3/config.yaml <<'EOF'
+containerd_additional_runtimes:
+  - name: nvidia
+    type: "io.containerd.runc.v2"
+    engine: ""
+    root: ""
+    options:
+      BinaryName: '/usr/bin/nvidia-container-runtime'
+EOF
+
 fi
 }
 
@@ -369,6 +381,7 @@ install_spheron &>> /home/spheron/logs/installer/spheron.log
 function setup_wallet(){
 if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
+mkdir -p /home/spheron/.spheron
 spheron keys add "wallet" --key-secret $KEY_SECRET --home /home/spheron/.spheron
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
@@ -438,8 +451,10 @@ sudo -u spheron ./run-helm-k3s.sh
 fi
 }
 
-echo "🌐 Installing Spheron Provider and Node"
-provider_install &>> /home/spheron/logs/installer/provider.log
+# echo "🌐 Installing Spheron Provider and Node"
+# provider_install &>> /home/spheron/logs/installer/provider.log
+echo "Automatic provider install is Disable"
+echo "🌐 Follow the Doc for Spheron Provider Installation after Restart"
 
 echo "🛡️ Creating firewall rules"
 cat <<EOF > ./firewall-ports.txt
