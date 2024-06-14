@@ -373,6 +373,10 @@ wget  https://spheron-release.s3.amazonaws.com/bins/amd64/spheron
 cp spheron /usr/local/bin/spheron
 chmod +x /usr/local/bin/spheron
 echo "Spheorn Version     : $(spheron version)"
+
+echo "Downloading bid script"
+wget -O /home/spheron/bidscript.sh https://spheron-release.s3.amazonaws.com/scripts/bidscript.sh
+
 }
 echo "🚀 Installing Spheron"
 install_spheron &>> /home/spheron/logs/installer/spheron.log
