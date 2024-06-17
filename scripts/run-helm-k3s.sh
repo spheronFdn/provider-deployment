@@ -78,7 +78,8 @@ provider_setup() {
         --set from=$ACCOUNT_ADDRESS \
         --set keysecret=$KEY_SECRET \
         --set domain=$DOMAIN \
-        --set bidpricestrategy=randomRange \
+        --set bidpricestrategy=shellScript \
+        --set bidpricescript="$(cat /home/spheron/bidscript.sh | openssl base64 -A)" \
         --set ipoperator=false \
         --set node=$NODE \
         --set log_restart_patterns="rpc node is not catching up|bid failed" \
