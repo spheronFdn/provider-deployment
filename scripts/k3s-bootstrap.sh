@@ -386,7 +386,8 @@ function setup_wallet(){
 if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
 mkdir -p /home/spheron/.spheron
-sudo -u spheron spheron keys create --name wallet --key-secret testPassword
+spheron keys create --name wallet --key-secret testPassword
+cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.js
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
 fi
