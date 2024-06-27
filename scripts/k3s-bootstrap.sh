@@ -387,7 +387,8 @@ if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
 mkdir -p /home/spheron/.spheron
 spheron keys create --name wallet --key-secret testPassword
-cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.js
+cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.json
+cp /root/.spheron/config.json /home/spheron/.spheron/config.json
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
 fi
