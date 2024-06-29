@@ -197,15 +197,6 @@
         regexp: '^spheron ALL=\(ALL\) NOPASSWD:ALL'
         line: 'spheron ALL=(ALL) NOPASSWD:ALL'
 
-    - name: Clone Akash dashboard repository
-      git:
-        repo: 'https://github.com/cryptoandcoffee/akashos-dashboard.git'
-        dest: '/home/spheron/dashboard'
-        version: HEAD
-        clone: yes
-        update: yes
-      become_user: "{{ user_name }}"
-
     - name: Generate SSH key for spheron user
       user:
         name: "{{ user_name }}"
