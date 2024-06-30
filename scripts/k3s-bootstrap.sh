@@ -200,70 +200,9 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
     esac
   done
 
-  # Dynamic or Static Public IP?
-  while true; do
-    clear
-    read -p "Do you have a dynamic DNS address or a static IP address? ($ip_) (dynamic/static): " choice
-    
-    case "$choice" in
-        dynamic|DYNAMIC ) 
-            ip_=dynamic
-            echo "You chose dynamic IP."
-            break
-            ;;
-        static|STATIC ) 
-            ip_=static
-            echo "You chose static IP."
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'dynamic' or 'static'."
-            sleep 2
-            ;;
-    esac
-  done 
-
   # End of client_node mode check
 fi
 
-
-
-if [[ $ip_ == "dynamic" ]]; then
-echo "Dynamic IP Detected"
-  echo "You must use a Dynamic DNS / No-IP service."
-    while true
-    do
-    clear
-    read -p "Enter your dynamic DNS url (spheron.no-ip.com) : " DYNAMICIP_
-    read -p "Are you sure the dynamic DNS url is correct? : $DYNAMICIP_ (y/n)? " choice
-    case "$choice" in
-      y|Y ) break;;
-      n|N ) echo "Try again" ; sleep 3;;
-      * ) echo "Invalid entry, please try again with Y or N" ; sleep 3;;
-    esac
-    done
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
-*.ingress 300 IN CNAME nodes.$DOMAIN_.
-nodes 300 IN CNAME $DYNAMICIP_.
-provider 300 IN CNAME nodes.$DOMAIN_.
-rpc 300 IN CNAME nodes.$DOMAIN_.
-EOF
-else
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
-*.ingress 300 IN CNAME nodes.$DOMAIN_.
-nodes 300 IN A X.X.X.X. #IP of this machine and any additional nodes
-nodes 300 IN A X.X.X.X. #IP of any additional nodes
-nodes 300 IN A X.X.X.X. #IP of any additional nodes
-provider 300 IN CNAME nodes.$DOMAIN_.
-rpc 300 IN CNAME nodes.$DOMAIN_.
-EOF
-
-fi
-}
 echo "Just a few questions..."
 # Never log
 user_input 
@@ -459,7 +398,7 @@ fi
 
 # echo "🌐 Installing Spheron Provider and Node"
 # provider_install &>> /home/spheron/logs/installer/provider.log
-echo "Automatic provider install is Disable"
+echo "❌ Automatic provider install is Disable"
 echo "🌐 Follow the Doc for Spheron Provider Installation after Restart"
 
 echo "🛡️ Creating firewall rules"
