@@ -315,6 +315,7 @@ echo "Spheorn Version     : $(spheron version)"
 
 echo "Downloading bid script"
 wget -O /home/spheron/bidscript.sh https://spheron-release.s3.amazonaws.com/scripts/bidscript.sh
+wget -O /home/spheron/price.json https://spheron-release.s3.amazonaws.com/scripts/price.json
 
 }
 echo "🚀 Installing Spheron"
