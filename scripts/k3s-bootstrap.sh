@@ -202,6 +202,7 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
 
   # End of client_node mode check
 fi
+}
 
 echo "Just a few questions..."
 # Never log
