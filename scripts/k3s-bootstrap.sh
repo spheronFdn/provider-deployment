@@ -99,56 +99,56 @@ if [[ $CLIENT_NODE_ == true ]]; then
     fi
 fi
 
-if [[ $CLIENT_NODE_ == "false" ]]; then
-  # Check if the user has an Spheron wallet
-  while true; do
-    clear
-    read -p "Do you have an Spheron wallet with at least 50 SPH and the mnemonic phrase available? (y/n, default: n): " choice
+# if [[ $CLIENT_NODE_ == "false" ]]; then
+#   # Check if the user has an Spheron wallet
+#   while true; do
+#     clear
+#     read -p "Do you have an Spheron wallet with at least 50 SPH and the mnemonic phrase available? (y/n, default: n): " choice
 
-    case "$choice" in
-        y|Y ) 
-            NEW_WALLET_=false
-            break
-            ;;
-        n|N ) 
-            echo "New wallet required during setup."
-            NEW_WALLET_=true
-            sleep 2
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 2
-            ;;
-    esac
-  done
+#     case "$choice" in
+#         y|Y ) 
+#             NEW_WALLET_=false
+#             break
+#             ;;
+#         n|N ) 
+#             echo "New wallet required during setup."
+#             NEW_WALLET_=true
+#             sleep 2
+#             break
+#             ;;
+#         * )
+#             echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
+#             sleep 2
+#             ;;
+#     esac
+#   done
 
-  # Import key if the user knows it
-  if [[ $NEW_WALLET_ == "false" ]]; then
-    while true; do
-      clear
-      read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
+#   # Import key if the user knows it
+#   if [[ $NEW_WALLET_ == "false" ]]; then
+#     while true; do
+#       clear
+#       read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
 
-      read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " choice
+#       read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " choice
         
-      case "$choice" in
-          y|Y ) 
-              break
-              ;;
-          n|N ) 
-              echo "Please try again."
-              sleep 2
-              ;;
-          * ) 
-              echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-              sleep 2
-              ;;
-      esac
-    done
-  fi
+#       case "$choice" in
+#           y|Y ) 
+#               break
+#               ;;
+#           n|N ) 
+#               echo "Please try again."
+#               sleep 2
+#               ;;
+#           * ) 
+#               echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
+#               sleep 2
+#               ;;
+#       esac
+#     done
+#   fi
 
-  # End of client node check
-fi
+#   # End of client node check
+# fi
 
 # GPU Support
 if lspci | grep -q NVIDIA; then
@@ -324,15 +324,15 @@ install_spheron &>> /home/spheron/logs/installer/spheron.log
 
 
 function setup_wallet(){
-if [[ $NEW_WALLET_ == "true" ]]; then
+# if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
 mkdir -p /home/spheron/.spheron
-spheron keys create --name wallet --key-secret testPassword
+spheron key create --name wallet --key-secret testPassword
 cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.json
 cp /root/.spheron/config.json /home/spheron/.spheron/config.json
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
-fi
+# fi
 }
 
 echo "💰 Creating wallet"
