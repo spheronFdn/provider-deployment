@@ -245,9 +245,9 @@ curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | apt-key add -
 curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | tee /etc/apt/sources.list.d/libnvidia-container.list
 apt-get -o Acquire::ForceIPv4=true update
 apt install ubuntu-drivers-common
-apt install nvidia-utils-535-server
-ubuntu-drivers autoinstall
 apt-get install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime 
+
+ubuntu-drivers autoinstall
 
 mkdir -p /etc/rancher/k3/
 cat > /etc/rancher/k3/config.yaml <<'EOF'
