@@ -339,6 +339,8 @@ ACCOUNT_ADDRESS=/spheron-key/wallet.json
 
 echo "💰 Creating wallet"
 setup_wallet &>> /home/spheron/logs/installer/wallet.log
+echo "🔑 Please save the memonic"
+cat /home/spheron/logs/installer/wallet.log | grep mnemonic 
 
 # if [[ $NEW_WALLET_ == "true" ]]; then
 # MNEMONIC=$(awk '/forget your password./{getline; getline; print}' /home/akash/logs/installer/wallet.log)
