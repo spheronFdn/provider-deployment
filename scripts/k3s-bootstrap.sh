@@ -311,8 +311,8 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 #Install Spheron and setup wallet
 function install_spheron(){
 wget  https://spheron-release.s3.amazonaws.com/bins/amd64/spheron
-cp spheron /usr/local/bin/spheron
-chmod +x /usr/local/bin/spheron
+cp spheron /usr/local/bin/sphnctl
+chmod +x /usr/local/bin/sphnctl
 echo "Spheorn Version     : $(spheron version)"
 
 echo "Downloading bid script"
