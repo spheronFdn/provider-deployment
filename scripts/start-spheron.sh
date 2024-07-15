@@ -17,7 +17,7 @@ cleanup_bootstrap() {
 
 # Fetch the new k3 bootstarp script and execute it
 run_bootstrap() {
-    wget -q --no-cache "https://raw.githubusercontent.com/spheronFdn/provider-deployment/devnet/scripts/k3s-bootstrap.sh"
+    wget -q --no-cache "https://raw.githubusercontent.com/spheronFdn/provider-deployment/main/scripts/k3s-bootstrap.sh"
     chmod +x "k3s-bootstrap.sh"
     echo "No setup detected! Enter the default password 'spheron' to start the spheron installer"
     sudo "./k3s-bootstrap.sh"
