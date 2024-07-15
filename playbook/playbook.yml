@@ -135,7 +135,7 @@
             rm /home/spheron/start-spheron.sh
           fi
           #Todo change the url
-          wget -q --no-cache https://raw.githubusercontent.com/spheronFdn/provider-deployment/devnet/scripts/start-spheron.sh
+          wget -q --no-cache https://raw.githubusercontent.com/spheronFdn/provider-deployment/main/scripts/start-spheron.sh
           chmod +x ./start-spheron.sh ; ./start-spheron.sh
         mode: '0755'
         owner: "{{ user_name }}"
