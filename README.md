@@ -269,3 +269,7 @@ spheron provider add --from ~/.spheron/wallet.json --key-secret testPassword --r
 ```
  ./spheron deployment close --dseq 469 --from /Users/chetan/.spheron/wallet.json --key-secret testPassword   
 ```
+
+### Acknowledgement
+
+This setup guide includes some contributions from [Andrew](https://github.com/88plug). We thank the author for the efforts and dedication to creating this setup script.
