@@ -4,12 +4,11 @@
   become: yes
   vars:
     user_name: spheron
-    user_password: '$6$ENk9jBUXFl8NVM56$wq3wLpWzV8qK1kcrf6wNa8DiqU5KeSBTddc5d2V3mNOvET2oDcMAr0CtxdHv/A7aecWM7QXiveiWHl0xDpBBa.'
-    hostname: provider.devnetbsphn.com
+    user_password: "$6$ENk9jBUXFl8NVM56$wq3wLpWzV8qK1kcrf6wNa8DiqU5KeSBTddc5d2V3mNOvET2oDcMAr0CtxdHv/A7aecWM7QXiveiWHl0xDpBBa."
+    hostname: provider.testnetdsphn.xyz
     ansible_ssh_common_args: "-o StrictHostKeyChecking=no" #Disable check for new hosts
 
   tasks:
-
     - name: Ensure the system timezone is set to UTC
       ansible.builtin.timezone:
         name: Etc/UTC
@@ -29,8 +28,6 @@
       authorized_key:
         user: "{{ user_name }}"
         key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-
-
 
     - name: Install necessary packages
       apt:
@@ -57,14 +54,14 @@
         update_cache: yes
         state: present
 
-# Set GRUB timeout to 0 seconds for near-instant booting
+    # Set GRUB timeout to 0 seconds for near-instant booting
     - name: Set GRUB timeout
       lineinfile:
         path: /etc/default/grub
-        regexp: '^GRUB_TIMEOUT='
-        line: 'GRUB_TIMEOUT=0'
+        regexp: "^GRUB_TIMEOUT="
+        line: "GRUB_TIMEOUT=0"
 
-#TIME
+    #TIME
     - name: Ensure chrony (NTP) package is installed
       apt:
         name: chrony
@@ -90,7 +87,7 @@
       debug:
         var: ntp_status.stdout_lines
 
-#LIMITS
+    #LIMITS
     - name: Increase max FD limit / ulimit
       blockinfile:
         path: "/etc/security/limits.conf"
@@ -112,17 +109,16 @@
         sysctl_set: yes
         reload: yes
       loop:
-        - { name: 'vm.min_free_kbytes', value: '131072' } #128Mb Memory Reserve
-        - { name: 'vm.swappiness', value: '0' }
-        - { name: 'fs.inotify.max_queued_events', value: '1048576' }
-        - { name: 'fs.inotify.max_user_instances', value: '1048576' }
-        - { name: 'fs.inotify.max_user_watches', value: '1048576' }
-        - { name: 'vm.max_map_count', value: '262144' }
-        - { name: 'fs.aio-max-nr', value: '524288' }
+        - { name: "vm.min_free_kbytes", value: "131072" } #128Mb Memory Reserve
+        - { name: "vm.swappiness", value: "0" }
+        - { name: "fs.inotify.max_queued_events", value: "1048576" }
+        - { name: "fs.inotify.max_user_instances", value: "1048576" }
+        - { name: "fs.inotify.max_user_watches", value: "1048576" }
+        - { name: "vm.max_map_count", value: "262144" }
+        - { name: "fs.aio-max-nr", value: "524288" }
 
     - name: Clear all journald logs
       command: journalctl --vacuum-time=1s
-
 
     - name: Create Spheron profile script
       copy:
@@ -137,7 +133,7 @@
           #Todo change the url
           wget -q --no-cache https://raw.githubusercontent.com/spheronFdn/provider-deployment/main/scripts/start-spheron.sh
           chmod +x ./start-spheron.sh ; ./start-spheron.sh
-        mode: '0755'
+        mode: "0755"
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
 
@@ -160,7 +156,7 @@
           | Terminal      : We recommend you login to spheron@\4
           |               : with a terminal that supports copy and paste.
           |--------------------------------------------------------------------------------------|
-        mode: '0644'
+        mode: "0644"
 
     - name: Update SSH and MOTD settings
       lineinfile:
@@ -168,8 +164,16 @@
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
       loop:
-        - { path: "/etc/default/motd-news", regexp: "^ENABLED=1", line: "ENABLED=0" }
-        - { path: "/etc/ssh/sshd_config", regexp: "^#PrintLastLog yes", line: "PrintLastLog no" }
+        - {
+            path: "/etc/default/motd-news",
+            regexp: "^ENABLED=1",
+            line: "ENABLED=0",
+          }
+        - {
+            path: "/etc/ssh/sshd_config",
+            regexp: "^#PrintLastLog yes",
+            line: "PrintLastLog no",
+          }
 
     - name: Cleanup Swap
       command: "{{ item }}"
@@ -195,7 +199,7 @@
         path: /etc/sudoers
         state: present
         regexp: '^spheron ALL=\(ALL\) NOPASSWD:ALL'
-        line: 'spheron ALL=(ALL) NOPASSWD:ALL'
+        line: "spheron ALL=(ALL) NOPASSWD:ALL"
 
     - name: Generate SSH key for spheron user
       user:
@@ -223,7 +227,7 @@
         post_reboot_delay: 30
         test_command: uptime
 
-# Define the handler at the end of your playbook
+  # Define the handler at the end of your playbook
   handlers:
     - name: update grub
       command: update-grub
