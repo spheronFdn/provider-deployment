@@ -225,6 +225,8 @@ apt-get -o Acquire::ForceIPv4=true update
 DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
 snap install kubectl --classic ; snap install helm --classic
+apt-get install -y sshpass
+
 #Disable sleep
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 #Disable IPv6
