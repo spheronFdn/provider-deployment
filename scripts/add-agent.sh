@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This setup guide includes some contributions from Andrew.
+# We thank the author for the efforts and dedication to creating this setup script.
+
 #Control plane
 SPHERON_NODE1_IP=134.195.196.81
 
