@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This setup guide includes some contributions from Andrew.
+# We thank the author for the efforts and dedication to creating this setup script.
+
+
 cd /home/spheron
 if [ -f variables ]; then 
 source /home/spheron/variables

@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# This setup guide includes some contributions from Andrew.
+# We thank the author for the efforts and dedication to creating this setup script.
+
 #To be run on a single k3s node - to get the base spheron provider software installed.
 mkdir -p  /home/spheron/logs/installer
 echo "Install logs are available in /home/spheron/logs/installer if anything breaks"
