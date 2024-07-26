@@ -14,13 +14,13 @@ while true; do
     read -p "Is this setup for the first node/machine in the cluster? (y/n, default: y): " choice
 
     case "$choice" in
-        n|N ) 
+        n|N|No|no|NO ) 
             CLIENT_NODE_=true
             echo "Client node setup selected."
             sleep 2
             break
             ;;
-        y|Y ) 
+        y|Y|Yes|yes|YES ) 
             CLIENT_NODE_=false
             echo "Initial setup for spheron-node1 selected."
             sleep 2
@@ -45,10 +45,10 @@ if [[ $CLIENT_NODE_ == true ]]; then
         read -p "Are you sure the hostname is correct? ($CLIENT_HOSTNAME_) (y/n): " choice
         
         case "$choice" in
-            y|Y ) 
+            y|Y|Yes|yes|YES ) 
                 break
                 ;;
-            n|N ) 
+            n|N|No|no|NO ) 
                 echo "Please try again."
                 sleep 2
                 ;;
@@ -62,13 +62,13 @@ fi
 
 if [[ $CLIENT_NODE_ == true ]]; then
     read -p "Do you want to attempt to automatically join the client node to the server node? (y/n): " choice
-    if [[ "$choice" =~ ^[yY]$ ]]; then
+    if [[ "$choice" =~ ^[yY]$|^Yes$|^YES$|^yes$ ]]; then
         while true; do
             read -p "What is the IP address of spheron-node1? : " SPHERON_NODE_1_IP
             
             read -p "Are you sure the IP address of spheron-node1 is correct? (Current: $SPHERON_NODE_1_IP) (y/n): " confirm
             case "$confirm" in
-                [yY] )
+                [yY]|yes|Yes|YES)
                     while true; do
                         read -p "Should this node be a control plane or an agent? (c/a): " node_type
                         case "$node_type" in
@@ -88,7 +88,7 @@ if [[ $CLIENT_NODE_ == true ]]; then
                     done
                     break
                     ;;
-                [nN] )
+                [nN]|No|NO|no )
                     echo "Please try again."
                     sleep 2
                     ;;
@@ -163,11 +163,11 @@ if lspci | grep -q NVIDIA; then
     read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " choice
     
     case "$choice" in
-        y|Y ) 
+        y|Y|Yes|yes|YES ) 
             GPU_=true
             break
             ;;
-        n|N ) 
+        n|N|No|NO|no ) 
             echo "Skipping GPU support."
             GPU_=false
             sleep 3
@@ -190,10 +190,10 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
     read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " choice
     
     case "$choice" in
-        y|Y ) 
+        y|Y|Yes|yes|YES ) 
             break
             ;;
-        n|N ) 
+        n|N|No|no|NO ) 
             echo "Please try again."
             sleep 2
             ;;
