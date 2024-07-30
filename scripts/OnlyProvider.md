@@ -31,7 +31,16 @@ sudo ./only-provider.sh
 
  [Link](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
 
-### Note: Make sure you run all helm and kubernetes command forom user which has root access
+## Move kube config to spheron user
+
+Setup kubeconfig for spheron user
+
+```
+sudo mkdir -p /home/spheron/.kube 
+sudo cp /root/.kube/config /home/spheron/.kube/kubeconfig
+sudo chown -R spheron:spheron /home/spheron/.kube
+export KUBECONFIG=/home/spheron/.kube/kubeconfig 
+``` 
 
 ## Setup Enviroment
 
@@ -115,7 +124,8 @@ kubectl delete pod nbody-gpu-benchmark
 We will be using provider helm chart for installation.
 
 ```shell
-git clone https://github.com/spheronFdn/provider-helm-
+export KEY_SECRET=walletKeySecret
+git clone https://github.com/spheronFdn/provider-helm-charts
 cd provider-helm-charts/charts
 REGION=$(jq -r '.region' /home/spheron/.spheron/provider-config.json)
 DOMAIN=$(jq -r '.hostname' /home/spheron/.spheron/provider-config.json)
