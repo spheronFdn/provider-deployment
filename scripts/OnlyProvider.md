@@ -1,8 +1,20 @@
 ## Install provider to existing kubernertes setup
 
+
+- Hostname needs to chnage, please edit the HOSTNAME is the next step.
+- KEY_SECRET is the secret for creating wallet so change it accordingly
+- The `only-provier.sh` makes following changes:
+    - Create spheron user
+    - Create hostname
+    - Install kubectl and helm
+    - Install sphnctl
+    - Download bid-script
+    - Create spheron wallet using key-secret
+
+
 ```shell
-HOSTNAME=provider.spheron.com
-KEY_SECRET=walletKeySecret
+export HOSTNAME=provider.spheron.com
+export KEY_SECRET=walletKeySecret
 chmod +x only-provider.sh
 ./only-provider.sh
 ```
@@ -30,6 +42,7 @@ chmod +x only-provider.sh
 ## Install nvidia-device-plugin 
 
 This step assumes you already have GPU setup(nvidia-smi, nvidia-drivers, cudaruntime..)
+
 Note: Install only if it is not installed
 
 ```shell
@@ -58,6 +71,8 @@ helm upgrade -i nvdp nvdp/nvidia-device-plugin \
 ```
 
 ### Create a GPU test pod 
+
+We will create a test pod to check if nvidia-runtime configured correctly
 
 ```shell
 cat > gpu-test-pod.yaml << EOF
@@ -95,6 +110,8 @@ kubectl delete pod nbody-gpu-benchmark
 
 ## Install provider using helm charts
 
+We will be using provider helm chart for installation.
+
 ```shell
 git clone https://github.com/spheronFdn/provider-helm-
 cd provider-helm-charts/charts
@@ -124,12 +141,17 @@ kubectl rollout restart statefulset/spheron-provider -n spheron-services
 
 ## Install Operators
 
+Install inventory and hostname operator
+
 ```shell
 helm upgrade --install spheron-hostname-operator ./spheron-hostname-operator -n spheron-services
 helm upgrade --install inventory-operator ./spheron-inventory-operator -n spheron-services
 ```
 
 ## Verify GPU Labels
+
+Let the installation settle and wait for few minutes
+Verify labels on the nodes
 
 ```shell
 kubectl get nodes
@@ -138,6 +160,8 @@ kubectl describe node [Node Name] | grep -A20 Labels
 
 
 ## Check status
+
+Using following command check status of the provider
 
 ```shell
 curl --insecure https://[hostname]:8443/status

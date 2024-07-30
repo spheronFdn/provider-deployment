@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Creating spheron user"
 sudo useradd -m -s /bin/bash spheron
 sudo usermod -aG sudo spheron
@@ -5,6 +6,7 @@ echo 'spheron ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
 # update hostname
 echo "Changing host name to $HOSTNAME"
 sudo hostnamectl set-hostname $HOSTNAME
+echo "Installing kubectl and helm"
 sudo snap install kubectl --classic ; snap install helm --classic
 
 echo "Installing latest sphnctl"
