@@ -13,7 +13,7 @@ echo "Installing latest sphnctl"
 wget -O install.sh https://sphnctl.sh
 chmod +x install.sh
 ./install.sh
-echo "Spheorn CLI Installed Version     : $(sphnctl version)"
+echo "Spheron CLI Installed Version     : $(sphnctl version)"
 
 echo "Downloading bidscript"
 wget -O /home/spheron/bidscript.sh https://spheron-release.s3.amazonaws.com/scripts/bidscript.sh
