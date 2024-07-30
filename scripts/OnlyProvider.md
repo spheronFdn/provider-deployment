@@ -1,0 +1,146 @@
+## Install provider to existing kubernertes setup
+
+```shell
+HOSTNAME=provider.spheron.com
+KEY_SECRET=walletKeySecret
+chmod +x only-provider.sh
+./only-provider.sh
+```
+
+## Provider Config
+
+[Link](https://docs.spheron.network/providers/setup-provider#create-provider-configuration)
+
+## Register Provider
+
+[Link](https://docs.spheron.network/providers/setup-provider#registering-a-provider)
+
+## Provider Attributes
+
+ [Link](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
+
+## Setup Enviroment
+
+[Link](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
+
+## Ingress
+
+[text](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
+
+## Install nvidia-device-plugin 
+
+This step assumes you already have GPU setup(nvidia-smi, nvidia-drivers, cudaruntime..)
+Note: Install only if it is not installed
+
+```shell
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
+
+helm repo update
+
+
+# Create NVIDIA RuntimeClass
+cat > /home/spheron/gpu-nvidia-runtime-class.yaml <<EOF
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: nvidia
+handler: nvidia
+EOF
+
+kubectl apply -f /home/spheron/gpu-nvidia-runtime-class.yaml
+
+helm upgrade -i nvdp nvdp/nvidia-device-plugin \
+  --namespace nvidia-device-plugin \
+  --create-namespace \
+  --version 0.14.5 \
+  --set runtimeClassName="nvidia"
+```
+
+### Create a GPU test pod 
+
+```shell
+cat > gpu-test-pod.yaml << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nbody-gpu-benchmark
+  namespace: default
+spec:
+  restartPolicy: OnFailure
+  runtimeClassName: nvidia
+  containers:
+  - name: cuda-container
+    image: nvcr.io/nvidia/k8s/cuda-sample:nbody
+    args: ["nbody", "-gpu", "-benchmark"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+    env:
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: all
+    - name: NVIDIA_DRIVER_CAPABILITIES
+      value: all
+EOF
+```
+
+```shell
+kubectl apply -f gpu-test-pod.yaml
+echo "Waiting 60 seconds for the test pod to start..."
+sleep 60
+kubectl get pods -A -o wide
+kubectl logs nbody-gpu-benchmark
+kubectl delete pod nbody-gpu-benchmark
+```
+
+## Install provider using helm charts
+
+```shell
+git clone https://github.com/spheronFdn/provider-helm-
+cd provider-helm-charts/charts
+REGION=$(jq -r '.region' /home/spheron/.spheron/provider-config.json)
+DOMAIN=$(jq -r '.hostname' /home/spheron/.spheron/provider-config.json)
+helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
+        --set from=/spheron-key/wallet.json \
+        --set keysecret=$KEY_SECRET \
+        --set domain=$DOMAIN \
+        --set bidpricestrategy=shellScript \
+        --set bidpricescript="$(cat /home/spheron/bidscript.sh | openssl base64 -A)" \
+        --set ipoperator=false \
+        --set node=spheron \
+        --set log_restart_patterns="rpc node is not catching up|bid failed" \
+        --set resources.limits.cpu="2" \
+        --set resources.limits.memory="2Gi" \
+        --set resources.requests.cpu="1" \
+        --set resources.requests.memory="1Gi"
+        
+kubectl patch configmap spheron-provider-scripts \
+      --namespace spheron-services \
+      --type json \
+      --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
+
+kubectl rollout restart statefulset/spheron-provider -n spheron-services        
+```
+
+## Install Operators
+
+```shell
+helm upgrade --install spheron-hostname-operator ./spheron-hostname-operator -n spheron-services
+helm upgrade --install inventory-operator ./spheron-inventory-operator -n spheron-services
+```
+
+## Verify GPU Labels
+
+```shell
+kubectl get nodes
+kubectl describe node [Node Name] | grep -A20 Labels
+```
+
+
+## Check status
+
+```shell
+curl --insecure https://[hostname]:8443/status
+```
+
+
