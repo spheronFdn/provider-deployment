@@ -48,6 +48,8 @@ export KUBECONFIG=/home/spheron/.kube/kubeconfig
 
 ## Ingress
 
+Note: If you are running k3s please disable traefik and servicelb
+
 [text](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
 
 ## Install nvidia-device-plugin 
