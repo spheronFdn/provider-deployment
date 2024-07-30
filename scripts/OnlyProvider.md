@@ -31,6 +31,8 @@ sudo ./only-provider.sh
 
  [Link](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
 
+### Note: Make sure you run all helm and kubernetes command forom user which has root access
+
 ## Setup Enviroment
 
 [Link](https://docs.spheron.network/providers/setup-provider#set-provider-attributes)
