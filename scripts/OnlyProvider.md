@@ -16,7 +16,7 @@
 export HOSTNAME=provider.spheron.com
 export KEY_SECRET=walletKeySecret
 chmod +x only-provider.sh
-./only-provider.sh
+sudo ./only-provider.sh
 ```
 
 ## Provider Config

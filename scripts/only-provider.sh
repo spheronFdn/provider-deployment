@@ -21,9 +21,9 @@ wget -O /home/spheron/bidscript.sh https://spheron-release.s3.amazonaws.com/scri
 echo "Creating Wallet"
 mkdir -p /home/spheron/.spheron
 sphnctl wallet create --name wallet --key-secret $KEY_SECRET
-cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.json
-cp /root/.spheron/config.json /home/spheron/.spheron/config.json
-chown -R spheron:spheron /home/spheron/.spheron
+sudo cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.json
+sudo cp /root/.spheron/config.json /home/spheron/.spheron/config.json
+sudo chown -R spheron:spheron /home/spheron/.spheron
 
 
 
