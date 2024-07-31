@@ -197,3 +197,7 @@ curl --insecure https://[hostname]:8443/status
 ```
 
 You can also look up your provider on our [Provider Dashboard](https://provider.spheron.network) to check if your era uptime is up to the mark. Additionally, you can withdraw your earnings and view your provider's tier and the rewards you are accruing.
+
+### Acknowledgement
+
+This project incorporates code from [AkashOS](https://github.com/cryptoandcoffee/akashos), created by [Andrew Mello](https://github.com/88plug), which is licensed under the GNU General Public License v3.0 (GPLv3). The full text of the GPL3 license can be found in the LICENSE file in this repository. We thank the author for the efforts and dedication to creating this setup script.
