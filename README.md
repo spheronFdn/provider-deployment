@@ -272,4 +272,4 @@ spheron provider add --from ~/.spheron/wallet.json --key-secret testPassword --r
 
 ### Acknowledgement
 
-This project incorporates code from AkashOS, created by [Andrew Mello](https://github.com/88plug), which is licensed under the GNU General Public License v3.0 (GPLv3). The full text of the GPL3 license can be found in the LICENSE file in this repository. We thank the author for the efforts and dedication to creating this setup script.
+This project incorporates code from [AkashOS](https://github.com/cryptoandcoffee/akashos), created by [Andrew Mello](https://github.com/88plug), which is licensed under the GNU General Public License v3.0 (GPLv3). The full text of the GPL3 license can be found in the LICENSE file in this repository. We thank the author for the efforts and dedication to creating this setup script.
