@@ -1,3 +1,9 @@
+# This project incorporates code from AkashOS (https://github.com/cryptoandcoffee/akashos),
+# created by Andrew Mello (https://github.com/88plug), which is licensed under the GNU General
+# Public License v3.0 (GPLv3). The full text of the GPLv3 license can be found in the LICENSE
+# file in this repository. We thank the author for the efforts and dedication to creating
+# this setup script.
+
 ---
 - name: Configure Spheron Node with Ubuntu 22.04
   hosts: all
