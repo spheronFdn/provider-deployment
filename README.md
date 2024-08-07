@@ -116,17 +116,17 @@ Expected/Example Output:
 
 Labels looks like this 
     ```
-    akash.network/capabilities.gpu.vendor.nvidia.model.p4=1
-    akash.network/capabilities.gpu.vendor.nvidia.model.p4.interface.pcie=1
-    akash.network/capabilities.gpu.vendor.nvidia.model.p4.ram.8Gi=1
+    spheron.network/capabilities.gpu.vendor.nvidia.model.p4=1
+    spheron.network/capabilities.gpu.vendor.nvidia.model.p4.interface.pcie=1
+    spheron.network/capabilities.gpu.vendor.nvidia.model.p4.ram.8Gi=1
     ```
 
 - Command to add labels
 
 ```
-kubectl label node spheron-node2 akash.network/capabilities.gpu.vendor.nvidia.model.p4=1
-kubectl label node spheron-node2 akash.network/capabilities.gpu.vendor.nvidia.model.p4.interface.PCIe=1
-kubectl label node spheron-node2 akash.network/capabilities.gpu.vendor.nvidia.model.p4.ram.8Gi=1
+kubectl label node spheron-node2 spheron.network/capabilities.gpu.vendor.nvidia.model.p4=1
+kubectl label node spheron-node2 spheron.network/capabilities.gpu.vendor.nvidia.model.p4.interface.PCIe=1
+kubectl label node spheron-node2 spheron.network/capabilities.gpu.vendor.nvidia.model.p4.ram.8Gi=1
 
 ```
 
@@ -172,11 +172,11 @@ EOF
 
 - Setup Basic enviroment
 ```
- kubectl create ns akash-services
-    kubectl label ns akash-services akash.network/name=akash-services akash.network=true
+ kubectl create ns spheron-services
+    kubectl label ns spheron-services spheron.network/name=spheron-services spheron.network=true
     kubectl create ns lease
-    kubectl label ns lease akash.network=true
-    kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/main/pkg/apis/akash.network/crd.yaml
+    kubectl label ns lease spheron.network=true
+    kubectl apply -f https://raw.githubusercontent.com/spheron-network/provider/main/pkg/apis/spheron.network/crd.yaml
 ```
 
 - Install the ingress charts
@@ -186,7 +186,7 @@ controller:
   service:
     type: ClusterIP
   ingressClassResource:
-    name: "akash-ingress-class"
+    name: "spheron-ingress-class"
   kind: DaemonSet
   hostPort:
     enabled: true
@@ -201,18 +201,18 @@ controller:
   extraArgs:
     enable-ssl-passthrough: true
 tcp:
-  "1317": "akash-services/akash-node-1:1317"
-  "8443": "akash-services/akash-provider:8443"
-  "9090":  "akash-services/akash-node-1:9090"
-  "26656": "akash-services/akash-node-1:26656"
-  "26657": "akash-services/akash-node-1:26657"
+  "1317": "spheron-services/spheron-node-1:1317"
+  "8443": "spheron-services/spheron-provider:8443"
+  "9090":  "spheron-services/spheron-node-1:9090"
+  "26656": "spheron-services/spheron-node-1:26656"
+  "26657": "spheron-services/spheron-node-1:26657"
 EOF
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
       --namespace ingress-nginx --create-namespace \
       -f ingress-nginx-custom.yaml
 
 kubectl label ns ingress-nginx app.kubernetes.io/name=ingress-nginx app.kubernetes.io/instance=ingress-nginx
-kubectl label ingressclass akash-ingress-class akash.network=true
+kubectl label ingressclass spheron-ingress-class spheron.network=true
 ``` 
 
 - Install the provider and operators
@@ -225,7 +225,7 @@ git checkout devnet-spheron
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
 
-helm upgrade --install akash-provider ./akash-provider -n akash-services \
+helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
         --set from=$ACCOUNT_ADDRESS \
         --set keysecret=$KEY_SECRET \
         --set domain=$DOMAIN \
@@ -238,16 +238,16 @@ helm upgrade --install akash-provider ./akash-provider -n akash-services \
         --set resources.requests.cpu="1" \
         --set resources.requests.memory="1Gi"
 
-    kubectl patch configmap akash-provider-scripts \
-      --namespace akash-services \
+    kubectl patch configmap spheron-provider-scripts \
+      --namespace spheron-services \
       --type json \
       --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
 
-    kubectl rollout restart statefulset/akash-provider -n akash-services
+    kubectl rollout restart statefulset/spheron-provider -n spheron-services
 
-    helm upgrade --install akash-hostname-operator ./akash-hostname-operator -n akash-services
+    helm upgrade --install spheron-hostname-operator ./spheron-hostname-operator -n spheron-services
 
-    helm upgrade --install inventory-operator ./akash-inventory-operator -n akash-services
+    helm upgrade --install inventory-operator ./spheron-inventory-operator -n spheron-services
 
 
 ```
