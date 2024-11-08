@@ -269,6 +269,13 @@ containerd_additional_runtimes:
       BinaryName: '/usr/bin/nvidia-container-runtime'
 EOF
 
+mkdir -p /home/spheron/.spheron
+chown -R spheron:spheron /home/spheron/.spheron
+nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n 1 > /home/spheron/.spheron/nvidia_version
+nvidia-smi | grep "CUDA Version" | awk '{print $9}' > /home/spheron/.spheron/cuda_version
+
+echo "NVIDIA Version: $(cat /home/spheron/.spheron/nvidia_version)"
+echo "CUDA Version: $(cat /home/spheron/.spheron/cuda_version)"
 fi
 }
 
