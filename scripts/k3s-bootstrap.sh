@@ -276,6 +276,9 @@ nvidia-smi | grep "CUDA Version" | awk '{print $9}' > /home/spheron/.spheron/cud
 
 echo "NVIDIA Version: $(cat /home/spheron/.spheron/nvidia_version)"
 echo "CUDA Version: $(cat /home/spheron/.spheron/cuda_version)"
+echo "Adding daily NVIDIA version check to crontab"
+CRON_JOB="0 0 * * * root nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n 1 > /home/spheron/.spheron/nvidia_version && nvidia-smi | grep \"CUDA Version\" | awk '{print \$9}' > /home/spheron/.spheron/cuda_version"
+echo "$CRON_JOB" >> /etc/crontab
 fi
 }
 
