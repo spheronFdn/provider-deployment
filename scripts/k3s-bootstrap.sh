@@ -106,56 +106,56 @@ if [[ $CLIENT_NODE_ == true ]]; then
     fi
 fi
 
-# if [[ $CLIENT_NODE_ == "false" ]]; then
-#   # Check if the user has an Spheron wallet
-#   while true; do
-#     clear
-#     read -p "Do you have an Spheron wallet with at least 50 SPH and the mnemonic phrase available? (y/n, default: n): " choice
+if [[ $CLIENT_NODE_ == "false" ]]; then
+  # Check if the user has an Spheron wallet
+  while true; do
+    clear
+    read -p "Do you have an Spheron wallet private key available? (y/n, default: n): " choice
 
-#     case "$choice" in
-#         y|Y ) 
-#             NEW_WALLET_=false
-#             break
-#             ;;
-#         n|N ) 
-#             echo "New wallet required during setup."
-#             NEW_WALLET_=true
-#             sleep 2
-#             break
-#             ;;
-#         * )
-#             echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-#             sleep 2
-#             ;;
-#     esac
-#   done
+    case "$choice" in
+        y|Y ) 
+            NEW_WALLET_=false
+            break
+            ;;
+        n|N ) 
+            echo "New wallet required during setup."
+            NEW_WALLET_=true
+            sleep 2
+            break
+            ;;
+        * )
+            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
+            sleep 2
+            ;;
+    esac
+  done
 
-#   # Import key if the user knows it
-#   if [[ $NEW_WALLET_ == "false" ]]; then
-#     while true; do
-#       clear
-#       read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
+  # Import key if the user knows it
+  if [[ $NEW_WALLET_ == "false" ]]; then
+    while true; do
+      clear
+      read -p "Enter the private key to import your provider wallet: " private_key_
 
-#       read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " choice
+      read -p "Are you sure the wallet private key is correct? ($private_key_) (y/n): " choice
         
-#       case "$choice" in
-#           y|Y ) 
-#               break
-#               ;;
-#           n|N ) 
-#               echo "Please try again."
-#               sleep 2
-#               ;;
-#           * ) 
-#               echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-#               sleep 2
-#               ;;
-#       esac
-#     done
-#   fi
+      case "$choice" in
+          y|Y ) 
+              break
+              ;;
+          n|N ) 
+              echo "Please try again."
+              sleep 2
+              ;;
+          * ) 
+              echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
+              sleep 2
+              ;;
+      esac
+    done
+  fi
 
-#   # End of client node check
-# fi
+  # End of client node check
+fi
 
 # GPU Support
 if lspci | grep -q NVIDIA; then
@@ -333,7 +333,7 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 #Install Spheron and setup wallet
 function install_spheron(){
-wget  https://spheron-release.s3.us-east-1.amazonaws.com/bins/dev/amd64/spheron
+wget  https://release.sphnctl.sh/bins/dev/amd64/spheron
 cp spheron /usr/local/bin/sphnctl
 chmod +x /usr/local/bin/sphnctl
 echo "Spheorn Version     : $(sphnctl version)"
@@ -347,7 +347,7 @@ install_spheron &>> /home/spheron/logs/installer/spheron.log
 
 
 function setup_wallet(){
-# if [[ $NEW_WALLET_ == "true" ]]; then
+if [[ $NEW_WALLET_ == "true" ]]; then
 KEY_SECRET=testPassword
 mkdir -p /home/spheron/.spheron
 sphnctl wallet create --name wallet --key-secret testPassword
@@ -355,35 +355,22 @@ cp /root/.spheron/wallet.json /home/spheron/.spheron/wallet.json
 cp /root/.spheron/config.json /home/spheron/.spheron/config.json
 chown -R spheron:spheron /home/spheron/.spheron
 ACCOUNT_ADDRESS=/spheron-key/wallet.json
-# fi
+fi
+
+if [[ $NEW_WALLET_ == "false" ]]; then
+    PRIVATE_KEY=$private_key_
+   sudo su - spheron -c "sphnctl wallet import --name wallet --private-key $PRIVATE_KEY"
+    echo "🔑 Wallet imported"
+fi
+
 }
 
-echo "💰 Creating wallet"
+echo "💰 Setting up wallet"
 setup_wallet &>> /home/spheron/logs/installer/wallet.log
-echo "🔑 Please save the memonic"
-cat /home/spheron/logs/installer/wallet.log | grep mnemonic 
-
-# if [[ $NEW_WALLET_ == "true" ]]; then
-# MNEMONIC=$(awk '/forget your password./{getline; getline; print}' /home/akash/logs/installer/wallet.log)
-# else
-# MNEMONIC=$mnemonic_
-# unset mnemonic_
-# fi
-
-# function check_wallet(){
-# ACCOUNT_ADDRESS_=$(echo $KEY_SECRET_ | akash keys list | grep address | cut -d ':' -f2 | cut -c 2-)
-# BALANCE=$(akash query bank balances --node https://akash-rpc.global.ssl.fastly.net:443 $ACCOUNT_ADDRESS_)
-# MIN_BALANCE=50
-
-# if (( $(echo "$BALANCE < 50" | bc -l) )); then
-#   echo "Balance is less than 50 AKT - you should send more coin to continue."
-#   echo "Found a balance of $BALANCE on the wallet $ACCOUNT_ADDRESS_"
-# else
-#   echo "Found a balance of $BALANCE on the wallet $ACCOUNT_ADDRESS_"
-# fi
-# sleep 5
-# }
-#check_wallet 
+if [[ $NEW_WALLET_ == "true" ]]; then
+    echo "🔑 Please save the memonic"
+    cat /home/spheron/logs/installer/wallet.log | grep mnemonic 
+fi
 
 echo "DOMAIN=$DOMAIN_" > variables
 echo "ACCOUNT_ADDRESS=$ACCOUNT_ADDRESS_" >> variables
