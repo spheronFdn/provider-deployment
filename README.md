@@ -218,10 +218,6 @@ kubectl label ingressclass spheron-ingress-class spheron.network=true
 - Install the provider and operators
 ```
 
-git clone  https://github.com/spheronFdn/provider-helm-charts.git
-cd provider-helm-charts/charts
-git checkout devnet-spheron
-
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
 

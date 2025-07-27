@@ -144,7 +144,6 @@ We will be using provider helm chart for installation.
 ```sh
 export HOSTNAME=provider.testnetbsphn.xyz
 export KEY_SECRET=testPassword
-cd /home/spheron/provider-helm-charts/charts
 REGION=$(jq -r '.region' /home/spheron/.spheron/provider-config.json)
 DOMAIN=$(jq -r '.hostname' /home/spheron/.spheron/provider-config.json)
 helm upgrade --install spheron-provider ./spheron-provider -n spheron-services \
